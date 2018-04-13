@@ -1,4 +1,4 @@
-Space Brain
+News Digest
 ---
 Alexa skill for saving time and receiving your daily world news digest verbally.
 
