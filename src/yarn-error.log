@@ -1,0 +1,61 @@
+Arguments: 
+  /usr/local/Cellar/node/9.5.0/bin/node /usr/local/bin/yarn add osmosis
+
+PATH: 
+  /usr/local/sbin:/Users/cbuonocore/go/bin:/Users/cbuonocore/.yarn/bin:~/.local/bin:/usr/local/bin/python2:/Users/cbuonocore/bin:/usr/local/bin:/usr/local/sbin:/Users/cbuonocore/go/bin:/Users/cbuonocore/.yarn/bin:~/.local/bin:/usr/local/bin/python2:/Users/cbuonocore/bin:/usr/local/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Library/TeX/texbin:/usr/local/go/bin:/Users/cbuonocore/Toast/git-repos/play1:/Users/cbuonocore/Library/Android/sdk/tools:/Users/cbuonocore/Library/Android/sdk/platform-tools:/Users/cbuonocore/Toast/git-repos/play1:/Users/cbuonocore/Library/Android/sdk/tools:/Users/cbuonocore/Library/Android/sdk/platform-tools:/Users/cbuonocore/anaconda3/bin:/Users/cbuonocore/.local/bin:/Users/cbuonocore/bin:/Users/cbuonocore/anaconda3/bin:/Users/cbuonocore/.local/bin:/Users/cbuonocore/bin
+
+Yarn version: 
+  1.5.1
+
+Node version: 
+  9.10.0
+
+Platform: 
+  darwin x64
+
+npm manifest: 
+  {
+    "name": "newsdigest",
+    "version": "1.0.0",
+    "description": "News digest is a productivity app for alexa to read you the news highlights for the last hour"
+    "main": "index.js",
+    "scripts": {
+      "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+      "type": "git",
+      "url": "git+https://github.com/cbonoz/news-digest.git"
+    },
+    "keywords": [
+      "news",
+      "digest",
+      "headlines",
+      "United States",
+      "life hacks",
+      "productivity"
+    ],
+    "author": "Chris Buonocore",
+    "license": "MIT",
+    "bugs": {
+      "url": "https://github.com/cbonoz/news-digest/issues"
+    },
+    "homepage": "https://github.com/cbonoz/news-digest#readme",
+    "dependencies": {
+      "alexa-sdk": "^1.0.24"
+    }
+  }
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile
+
+Trace: 
+  SyntaxError: /Users/cbuonocore/personal/alexa/news-digest/src/package.json: Unexpected string in JSON at position 163
+      at JSON.parse (<anonymous>)
+      at /usr/local/lib/node_modules/yarn/lib/cli.js:1036:59
+      at Generator.next (<anonymous>)
+      at step (/usr/local/lib/node_modules/yarn/lib/cli.js:98:30)
+      at /usr/local/lib/node_modules/yarn/lib/cli.js:109:13
+      at <anonymous>

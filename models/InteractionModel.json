@@ -1,0 +1,50 @@
+{
+  "interactionModel": {
+    "languageModel": {
+      "invocationName": "news digest",
+      "intents": [
+        {
+          "name": "AMAZON.CancelIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.HelpIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.StopIntent",
+          "samples": []
+        },
+        {
+          "name": "NewsIntent",
+          "slots": [],
+          "samples": [
+            "for today's digest",
+            "for today's headlines",
+            "for today's news",
+            "for the news"
+          ]
+        },
+        {
+          "name": "NextIntent",
+          "slots": [],
+          "samples": [
+            "next headline",
+            "next"
+          ]
+        },
+        {
+          "name": "DetailIntent",
+          "slots": [],
+          "samples": [
+            "more information",
+            "more info",
+            "more detail",
+            "details"
+          ]
+        }
+      ],
+      "types": []
+    }
+  }
+}

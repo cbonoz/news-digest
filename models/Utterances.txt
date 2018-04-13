@@ -1,0 +1,10 @@
+NewsIntent for the headlines
+NewsIntent headlines
+
+NextIntent next
+NextIntent next headline
+
+DetailIntent more details
+DetailIntent more information
+DetailIntent details
+DetailIntent information

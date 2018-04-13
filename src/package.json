@@ -1,0 +1,31 @@
+{
+  "name": "newsdigest",
+  "version": "1.0.0",
+  "description": "News digest is a productivity app for alexa to read you the news highlights from today",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cbonoz/news-digest.git"
+  },
+  "keywords": [
+    "news",
+    "digest",
+    "headlines",
+    "United States",
+    "life hacks",
+    "productivity"
+  ],
+  "author": "Chris Buonocore",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/cbonoz/news-digest/issues"
+  },
+  "homepage": "https://github.com/cbonoz/news-digest#readme",
+  "dependencies": {
+    "alexa-sdk": "^1.0.24",
+    "scrape-it": "^5.0.3"
+  }
+}
