@@ -25,14 +25,46 @@ const library = (function () {
         return str
     }
 
+    const TIMEZONE_MAP = {
+        EST: 'Eastern',
+        EDT: 'Eastern',
+        CST: 'Central',
+        CDT: 'Central',
+        MST: 'Mountain',
+        MDT: 'Mountain',
+        PST: 'Pacific',
+        PDT: 'Pacific',
+    };
+
+    const timeZoneRegex = new RegExp(Object.keys(TIMEZONE_MAP).join("|"),"gi");
+
+    function replaceTimeZoneAbbr(str) {
+        str = str.replace(timeZoneRegex, function(matched){
+            return TIMEZONE_MAP[matched];
+        });
+        return str;
+    }
+
     function formatContent(x) {
         x = x.replace(/\s+/g, ' ').trim();
         const sentences = x.split('.');
 
         // last sentence is the reported time.
-        const lastSentence = sentences[sentences.length - 1];
+        const lastSentence = replaceTimeZoneAbbr(sentences[sentences.length - 1]);
         sentences[sentences.length - 1] = ` Reported at:${lastSentence} today.`;
         return sentences.join('.')
+    }
+
+    function getNumberSuffix() {
+        if (i < 2) {
+            return 'st';
+        } else if (i < 3) {
+            return 'nd';
+        } else if (i < 4) {
+            return 'rd';
+        } else {
+            return 'th';
+        }
     }
 
     /*
@@ -66,7 +98,9 @@ const library = (function () {
     return {
         capitalize: capitalize,
         getHeadlines: getHeadlines,
+        getNumberSuffix: getNumberSuffix,
         getRandom: getRandom,
+        replaceTimeZoneAbbr: replaceTimeZoneAbbr,
         toTitleCase: toTitleCase,
         formatDateTimeMs: formatDateTimeMs,
         WORLD_NEWS_URL: WORLD_NEWS_URL

@@ -20,9 +20,14 @@
           "slots": [],
           "samples": [
             "for today's digest",
+            "for recent news",
+            "for the digest",
+            "digest",
+            "headlines",
             "for today's headlines",
             "for today's news",
-            "for the news"
+            "for the news",
+            "news"
           ]
         },
         {
@@ -34,12 +39,21 @@
           ]
         },
         {
+          "name": "RepeatIntent",
+          "slots": [],
+          "samples": [
+            "repeat headline",
+            "repeat"
+          ]
+        },
+        {
           "name": "DetailIntent",
           "slots": [],
           "samples": [
             "more information",
             "more info",
             "more detail",
+            "tell me more",
             "details"
           ]
         }
