@@ -3,8 +3,6 @@ News Digest
 
 Productivity-related Alexa skill for saving time and receiving your daily world news digest verbally. No longer have to sit and read through headlines, listen and follow the news verbally while getting ready with this Alexa skill.
 
-
-
 <!-- Skill logo here -->
 <img src="./assets/news_digest_512.png" style="width: 400px"/>
 

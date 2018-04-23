@@ -31,34 +31,35 @@ const ERROR_MESSAGE = `Sorry, there was an error getting today's headlines`;
 // Core base app entry handlers //
 // **************************** //
 
+function startNews(handlerInput) {
+    const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
+    sessionAttributes['headlineIndex'] = 0;
+    news.getHeadlines((err, {data}) => {
+        console.log('getHeadlines data', data);
+        let message;
+        if (err) {
+            message = `${ERROR_MESSAGE}: ${err}`;
+        } else {
+            const headlines = data.articles;
+            sessionAttributes['headlines'] = headlines;
+            message = `I found ${headlines.length} recent headlines. The top headline is: ${headlines[0].title} ${NEXT_OPTION_MESSAGE}`;
+        }
+
+        return handlerInput.responseBuilder
+            .speak(message)
+            .reprompt(NEXT_OPTION_MESSAGE)
+            .withSimpleCard(APP_NAME, message)
+            .getResponse();
+    });
+}
+
 const LaunchAndNewsRequestHandler = {
     canHandle(handlerInput) {
         const request = handlerInput.requestEnvelope.request;
         return request.type === 'LaunchRequest' || request.intent.name === 'NewsIntent';
     },
     handle(handlerInput) {
-        const self = this;
-        const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
-        sessionAttributes['headlineIndex'] = 0;
-        news.getHeadlines((err, {data}) => {
-            console.log('getHeadlines data', data);
-            let message;
-            if (err) {
-                message = `${ERROR_MESSAGE}: ${err}`;
-                self.response.speak(message);
-            } else {
-                const headlines = data.articles;
-                sessionAttributes['headlines'] = headlines;
-                message = `I found ${headlines.length} recent headlines. The top headline is: ${headlines[0].title} ${NEXT_OPTION_MESSAGE}`;
-            }
-
-            return handlerInput.responseBuilder
-                .speak(message)
-                .reprompt(NEXT_OPTION_MESSAGE)
-                .withSimpleCard(APP_NAME, message)
-                .getResponse();
-        });
-
+        return startNews(handlerInput);
     }
 };
 
@@ -73,6 +74,10 @@ const NextOrRepeatHandler = {
         const request = handlerInput.requestEnvelope.request;
         const headlines = sessionAttributes['headlines'];
         let headlineIndex = sessionAttributes['headlineIndex'];
+
+        if (!headlines || headlineIndex === undefined) {
+            return startNews(handlerInput);
+        }
 
         if (request.intent.name === 'NextIntent') {
             // If next intent, increment the headline index.
@@ -106,6 +111,11 @@ const DetailHandler = {
         const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
         const headlines = sessionAttributes['headlines'];
         const headlineIndex = sessionAttributes['headlineIndex'];
+
+        if (!headlines || headlineIndex === undefined) {
+            return startNews(handlerInput);
+        }
+
         const currentHeadline = headlines[headlineIndex];
         if (currentHeadline) {
             const title = currentHeadline.title;
