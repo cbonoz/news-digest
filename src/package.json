@@ -25,7 +25,7 @@
   },
   "homepage": "https://github.com/cbonoz/news-digest#readme",
   "dependencies": {
-    "alexa-sdk": "^1.0.24",
+    "ask-sdk": "^2.0.0",
     "scrape-it": "^5.0.3"
   }
 }

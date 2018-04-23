@@ -1,5 +1,5 @@
 'use strict';
-const Alexa = require('alexa-sdk');
+const Alexa = require('ask-sdk-core');
 
 // My libraries.
 const news = require('./news');
@@ -27,112 +27,153 @@ const UNHANDLED_MESSAGE = "Sorry I didn't get that.";
 
 const ERROR_MESSAGE = `Sorry, there was an error getting today's headlines`;
 
-// If you don't want to use cards in your skill, set the USE_CARDS_FLAG to false.  If you set it to true, you will need an image for each
-// fact in your data.
-const USE_CARDS_FLAG = true;
+// **************************** //
+// Core base app entry handlers //
+// **************************** //
 
-const states = {
-    NEWSMODE: '_NEWSMODE' // Prompt the user to start or restart the game.
-};
-
-// Core base app entry handlers.
-const handlers = {
-    "LaunchRequest": function () {
-        this.emit(":NewsIntent");
+const LaunchAndNewsRequestHandler = {
+    canHandle(handlerInput) {
+        const request = handlerInput.requestEnvelope.request;
+        return request.type === 'LaunchRequest' || request.intent.name === 'NewsIntent';
     },
-    "NewsIntent": function () {
+    handle(handlerInput) {
         const self = this;
-        self.attributes['headlineIndex'] = 0;
+        const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
+        sessionAttributes['headlineIndex'] = 0;
         news.getHeadlines((err, {data}) => {
-            console.log('data', data);
+            console.log('getHeadlines data', data);
             let message;
             if (err) {
                 message = `${ERROR_MESSAGE}: ${err}`;
                 self.response.speak(message);
             } else {
                 const headlines = data.articles;
-                self.attributes['headlines'] = headlines;
+                sessionAttributes['headlines'] = headlines;
                 message = `I found ${headlines.length} recent headlines. The top headline is: ${headlines[0].title} ${NEXT_OPTION_MESSAGE}`;
-                self.handler.state = states.NEWSMODE;
             }
-            self.response.speak(message).listen(NEXT_OPTION_MESSAGE);
-            self.emit(":responseReady");
+
+            return handlerInput.responseBuilder
+                .speak(message)
+                .reprompt(NEXT_OPTION_MESSAGE)
+                .withSimpleCard(APP_NAME, message)
+                .getResponse();
         });
-    },
-    "Unhandled": function () {
-        const message = `${UNHANDLED_MESSAGE} ${HELP_MESSAGE}`;
-        this.response.speak(message).listen(HELP_MESSAGE);
-        this.emit(":responseReady");
+
     }
 };
 
-const newsModeHandlers = Alexa.CreateStateHandler(states.STARTMODE, {
-    "RepeatIntent": function () {
-        this.emit(':NextIntent', 0);
+const NextOrRepeatHandler = {
+    canHandle(handlerInput) {
+        const request = handlerInput.requestEnvelope.request;
+        return request.type === 'IntentRequest'
+            && (request.intent.name === 'AMAZON.RepeatIntent' || request.intent.name === 'NextIntent');
     },
-    "NextIntent": function (offset) {
-        const self = this;
-        const headlines = self.attributes['headlines'];
-        if (!offset) {
-            offset = 1;
+    handle(handlerInput) {
+        const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
+        const request = handlerInput.requestEnvelope.request;
+        const headlines = sessionAttributes['headlines'];
+        let headlineIndex = sessionAttributes['headlineIndex'];
+
+        if (request.intent.name === 'NextIntent') {
+            // If next intent, increment the headline index.
+            headlineIndex += 1;
+            sessionAttributes['headlineIndex'] = headlineIndex;
         }
-        const headlineIndex = self.attributes['headlineIndex'] + offset;
-        self.attributes['headlineIndex'] = headlineIndex;
+
         let message;
         if (headlineIndex >= headlines.length) {
             message = NO_MORE_HEADLINES_MESSAGE + " " + EXIT_SKILL_MESSAGE;
-            this.response.speak(message);
-            this.handler.state = '';
+            return handlerInput.responseBuilder
+                .speak(message)
+                .getResponse();
         } else {
             const currentHeadline = headlines[headlineIndex];
             message = `${headlineIndex + 1}${news.getNumberSuffix(headlineIndex + 1)} headline: ${currentHeadline.title} ${NEXT_OPTION_MESSAGE}`;
-            this.response.speak(message).listen(WELCOME_MESSAGE);
+            return handlerInput.responseBuilder
+                .speak(message)
+                .reprompt(WELCOME_MESSAGE)
+                .getResponse();
         }
-
-        this.emit(":responseReady");
     },
-    "DetailIntent": function () {
-        const self = this;
-        const headlines = self.attributes['headlines'];
-        const headlineIndex = self.attributes['headlineIndex'];
+};
+
+const DetailHandler = {
+    canHandle(handlerInput) {
+        const request = handlerInput.requestEnvelope.request;
+        return request.type === 'IntentRequest' && request.intent.name === 'DetailIntent';
+    },
+    handle(handlerInput) {
+        const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
+        const headlines = sessionAttributes['headlines'];
+        const headlineIndex = sessionAttributes['headlineIndex'];
         const currentHeadline = headlines[headlineIndex];
         if (currentHeadline) {
             const title = currentHeadline.title;
             const content = currentHeadline.content;
             const message = `${content} ${NEXT_OPTION_MESSAGE}`;
-
-            self.response.cardRenderer(title, content, '')
+            return handlerInput.responseBuilder
                 .speak(message)
-                .listen(NEXT_OPTION_MESSAGE);
+                .withSimpleCard(APP_NAME, content)
+                .reprompt(NEXT_OPTION_MESSAGE)
+                .getResponse();
         } else {
-            self.response.speak(ERROR_MESSAGE);
+            return handlerInput.responseBuilder
+                .speak(ERROR_MESSAGE)
+                .getResponse();
         }
-
-        self.emit(":responseReady");
-    },
-    "AMAZON.StopIntent": function () {
-        this.response.speak(EXIT_SKILL_MESSAGE);
-        this.emit(":responseReady");
-    },
-    "AMAZON.CancelIntent": function () {
-        this.response.speak(EXIT_SKILL_MESSAGE);
-        this.emit(":responseReady");
-    },
-    "AMAZON.HelpIntent": function () {
-        this.response.speak(HELP_MESSAGE).listen(HELP_MESSAGE);
-        this.emit(":responseReady");
-    },
-    "Unhandled": function () {
-        const message = `${UNHANDLED_MESSAGE} ${HELP_MESSAGE}`;
-        this.response.speak(message).listen(HELP_MESSAGE);
-        this.emit(":responseReady");
     }
-});
-
-exports.handler = (event, context) => {
-    const alexa = Alexa.handler(event, context);
-    alexa.appId = APP_ID;
-    alexa.dynamoDBTableName = 'NewsDigestCache';
-    alexa.registerHandlers(handlers, newsModeHandlers);
-    alexa.execute();
 };
+
+const ExitHandler = {
+    canHandle(handlerInput) {
+        const request = handlerInput.requestEnvelope.request;
+        return request.type === 'IntentRequest'
+            && (request.intent.name === 'AMAZON.CancelIntent' || request.intent.name === 'AMAZON.StopIntent');
+    },
+    handle(handlerInput) {
+        return handlerInput.responseBuilder
+            .speak(EXIT_SKILL_MESSAGE)
+            .getResponse();
+    },
+};
+
+const ErrorHandler = {
+    canHandle() {
+        return true;
+    },
+    handle(handlerInput, error) {
+        console.log(`Error handled: ${error.message}`);
+        const message = `${UNHANDLED_MESSAGE} ${HELP_MESSAGE}`;
+
+        return handlerInput.responseBuilder
+            .speak(message)
+            .reprompt(HELP_MESSAGE)
+            .getResponse();
+    },
+};
+
+const HelpHandler = {
+    canHandle(handlerInput) {
+        const request = handlerInput.requestEnvelope.request;
+        return request.type === 'IntentRequest'
+            && request.intent.name === 'AMAZON.HelpIntent';
+    },
+    handle(handlerInput) {
+        return handlerInput.responseBuilder
+            .speak(HELP_MESSAGE)
+            .reprompt(HELP_MESSAGE)
+            .getResponse();
+    },
+};
+
+const skillBuilder = Alexa.SkillBuilders.custom();
+
+exports.handler = skillBuilder.addRequestHandlers(
+        LaunchAndNewsRequestHandler,
+        DetailHandler,
+        NextOrRepeatHandler,
+        HelpHandler,
+        ExitHandler,
+    )
+    .addErrorHandlers(ErrorHandler)
+    .lambda();

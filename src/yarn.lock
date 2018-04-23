@@ -33,6 +33,28 @@ alexa-sdk@^1.0.24:
     i18next "^3.4.1"
     i18next-sprintf-postprocessor "^0.2.2"
 
+ask-sdk-core@^2.0.0:
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/ask-sdk-core/-/ask-sdk-core-2.0.1.tgz#6661515236f06ea2a0a716b22e5a0fb5078f1c7a"
+
+ask-sdk-dynamodb-persistence-adapter@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/ask-sdk-dynamodb-persistence-adapter/-/ask-sdk-dynamodb-persistence-adapter-2.0.0.tgz#32aa7ac6e573484e8822bbb2aaa4ca08c942fd8d"
+  dependencies:
+    aws-sdk "^2.163.0"
+
+ask-sdk-model@^1.0.0:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/ask-sdk-model/-/ask-sdk-model-1.0.1.tgz#09ad8058a9d4750e5e93bdee337ab51731b9122d"
+
+ask-sdk@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/ask-sdk/-/ask-sdk-2.0.0.tgz#f9e8b3ec7a72b27fee5928d2f9e75e8a62ffb7a9"
+  dependencies:
+    ask-sdk-core "^2.0.0"
+    ask-sdk-dynamodb-persistence-adapter "^2.0.0"
+    ask-sdk-model "^1.0.0"
+
 asn1@~0.2.3:
   version "0.2.3"
   resolved "https://registry.yarnpkg.com/asn1/-/asn1-0.2.3.tgz#dac8787713c9966849fc8180777ebe9c1ddf3b86"
@@ -51,6 +73,21 @@ assured@^1.0.10, assured@^1.0.6:
 asynckit@^0.4.0:
   version "0.4.0"
   resolved "https://registry.yarnpkg.com/asynckit/-/asynckit-0.4.0.tgz#c79ed97f7f34cb8f2ba1bc9790bcc366474b4b79"
+
+aws-sdk@^2.163.0:
+  version "2.226.1"
+  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.226.1.tgz#8e6e2b466aaf26cb35714905d5f934e6c8317a99"
+  dependencies:
+    buffer "4.9.1"
+    events "1.1.1"
+    ieee754 "1.1.8"
+    jmespath "0.15.0"
+    querystring "0.2.0"
+    sax "1.2.1"
+    url "0.10.3"
+    uuid "3.1.0"
+    xml2js "0.4.17"
+    xmlbuilder "4.2.1"
 
 aws-sdk@^2.4.7:
   version "2.224.1"
