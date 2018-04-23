@@ -6,7 +6,7 @@ Productivity-related Alexa skill for saving time and receiving your daily world 
 
 
 <!-- Skill logo here -->
-<img src=""/>
+<img src="./assets/news_digest_512.png" style="width: 400px"/>
 
 keywords:
  news, productivity, education, media, business, digest, headlines, life hacks challenge
