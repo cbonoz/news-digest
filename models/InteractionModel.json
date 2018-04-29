@@ -40,7 +40,10 @@
           "samples": [
             "next headline",
             "give me the next one",
-            "next"
+            "next",
+            "continue",
+            "another headline",
+            "next article"
           ]
         },
         {
@@ -52,7 +55,8 @@
             "give me more detail",
             "more detail",
             "tell me more",
-            "details"
+            "details",
+            "detail"
           ]
         }
       ],
