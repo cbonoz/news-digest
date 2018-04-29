@@ -33,7 +33,7 @@ const library = (function () {
         MST: 'Mountain',
         MDT: 'Mountain',
         PST: 'Pacific',
-        PDT: 'Pacific',
+        PDT: 'Pacific'
     };
 
     const timeZoneRegex = new RegExp(Object.keys(TIMEZONE_MAP).join("|"),"gi");

@@ -39,6 +39,7 @@
           "slots": [],
           "samples": [
             "next headline",
+            "give me the next one",
             "next"
           ]
         },
@@ -48,6 +49,7 @@
           "samples": [
             "more information",
             "more info",
+            "give me more detail",
             "more detail",
             "tell me more",
             "details"

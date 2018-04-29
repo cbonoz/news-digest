@@ -1,11 +1,12 @@
 'use strict';
+
 const Alexa = require('ask-sdk-core');
 
 // My libraries.
 const news = require('./news');
 
 // Enclose your app id value in quotes, like this:  const APP_ID = "amzn1.ask.skill.bb4045e6-b3e8-4133-b650-72923c5980f1";
-const APP_ID = "amzn1.ask.skill.5adedf12-0b56-430f-b839-1fecfa9a19c6";
+// const APP_ID = "amzn1.ask.skill.5adedf12-0b56-430f-b839-1fecfa9a19c6";
 const APP_NAME = "News Digest";
 
 const NEXT_OPTION_MESSAGE = `Say 'detail', 'repeat', or 'next' for the next headline.`;
@@ -27,31 +28,15 @@ const UNHANDLED_MESSAGE = "Sorry I didn't get that.";
 
 const ERROR_MESSAGE = `Sorry, there was an error getting today's headlines`;
 
+
+const states = {
+    START: `_START`,
+    NEWS: `_NEWS`,
+};
+
 // **************************** //
 // Core base app entry handlers //
 // **************************** //
-
-function startNews(handlerInput) {
-    const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
-    sessionAttributes['headlineIndex'] = 0;
-    news.getHeadlines((err, {data}) => {
-        console.log('getHeadlines data', data);
-        let message;
-        if (err) {
-            message = `${ERROR_MESSAGE}: ${err}`;
-        } else {
-            const headlines = data.articles;
-            sessionAttributes['headlines'] = headlines;
-            message = `I found ${headlines.length} recent headlines. The top headline is: ${headlines[0].title} ${NEXT_OPTION_MESSAGE}`;
-        }
-
-        return handlerInput.responseBuilder
-            .speak(message)
-            .reprompt(NEXT_OPTION_MESSAGE)
-            .withSimpleCard(APP_NAME, message)
-            .getResponse();
-    });
-}
 
 const LaunchAndNewsRequestHandler = {
     canHandle(handlerInput) {
@@ -59,15 +44,41 @@ const LaunchAndNewsRequestHandler = {
         return request.type === 'LaunchRequest' || request.intent.name === 'NewsIntent';
     },
     handle(handlerInput) {
-        return startNews(handlerInput);
+        const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
+        sessionAttributes['headlineIndex'] = 0;
+        return new Promise((resolve) => {
+            news.getHeadlines((err, {data}) => {
+                console.log('getHeadlines data', data);
+                let message;
+                let reprompt;
+                if (err) {
+                    message = `${ERROR_MESSAGE}: ${err}`;
+                    reprompt = WELCOME_MESSAGE;
+                    sessionAttributes['state'] = states.START;
+                } else {
+                    const headlines = data.articles;
+                    sessionAttributes['headlines'] = headlines;
+                    message = `I found ${headlines.length} recent headlines. The top headline is: ${headlines[0].title}. ${NEXT_OPTION_MESSAGE}`;
+                    reprompt = NEXT_OPTION_MESSAGE;
+                    sessionAttributes['state'] = states.NEWS;
+                }
+
+                resolve(handlerInput.responseBuilder
+                    .speak(message)
+                    .reprompt(reprompt)
+                    .withSimpleCard(APP_NAME, message)
+                    .getResponse());
+            });
+        });
     }
 };
 
 const NextOrRepeatHandler = {
     canHandle(handlerInput) {
+        const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
         const request = handlerInput.requestEnvelope.request;
-        return request.type === 'IntentRequest'
-            && (request.intent.name === 'AMAZON.RepeatIntent' || request.intent.name === 'NextIntent');
+        return sessionAttributes.state === states.NEWS && (request.type === 'IntentRequest'
+            && (request.intent.name === 'AMAZON.RepeatIntent' || request.intent.name === 'NextIntent'));
     },
     handle(handlerInput) {
         const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
@@ -75,14 +86,14 @@ const NextOrRepeatHandler = {
         const headlines = sessionAttributes['headlines'];
         let headlineIndex = sessionAttributes['headlineIndex'];
 
-        if (!headlines || headlineIndex === undefined) {
-            return startNews(handlerInput);
-        }
-
         if (request.intent.name === 'NextIntent') {
             // If next intent, increment the headline index.
             headlineIndex += 1;
             sessionAttributes['headlineIndex'] = headlineIndex;
+        }
+
+        if (headlines === undefined) {
+            return LaunchAndNewsRequestHandler.handle(handlerInput);
         }
 
         let message;
@@ -104,21 +115,23 @@ const NextOrRepeatHandler = {
 
 const DetailHandler = {
     canHandle(handlerInput) {
+        const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
         const request = handlerInput.requestEnvelope.request;
-        return request.type === 'IntentRequest' && request.intent.name === 'DetailIntent';
+        return sessionAttributes.state === states.NEWS &&
+            (request.type === 'IntentRequest' && request.intent.name === 'DetailIntent');
     },
     handle(handlerInput) {
         const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
         const headlines = sessionAttributes['headlines'];
         const headlineIndex = sessionAttributes['headlineIndex'];
 
-        if (!headlines || headlineIndex === undefined) {
-            return startNews(handlerInput);
+        if (headlines === undefined) {
+            return LaunchAndNewsRequestHandler.handle(handlerInput);
         }
 
         const currentHeadline = headlines[headlineIndex];
         if (currentHeadline) {
-            const title = currentHeadline.title;
+            // const title = currentHeadline.title;
             const content = currentHeadline.content;
             const message = `${content} ${NEXT_OPTION_MESSAGE}`;
             return handlerInput.responseBuilder
@@ -152,12 +165,18 @@ const ErrorHandler = {
         return true;
     },
     handle(handlerInput, error) {
+        const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
         console.log(`Error handled: ${error.message}`);
-        const message = `${UNHANDLED_MESSAGE} ${HELP_MESSAGE}`;
+        let message = '';
+        if (sessionAttributes.state === states.NEWS) {
+            message = HELP_MESSAGE;
+        } else {
+            message = WELCOME_MESSAGE;
+        }
 
         return handlerInput.responseBuilder
-            .speak(message)
-            .reprompt(HELP_MESSAGE)
+            .speak(`${UNHANDLED_MESSAGE} ${message}`)
+            .reprompt(message)
             .getResponse();
     },
 };
@@ -165,8 +184,7 @@ const ErrorHandler = {
 const HelpHandler = {
     canHandle(handlerInput) {
         const request = handlerInput.requestEnvelope.request;
-        return request.type === 'IntentRequest'
-            && request.intent.name === 'AMAZON.HelpIntent';
+        return request.type === 'IntentRequest' && request.intent.name === 'AMAZON.HelpIntent';
     },
     handle(handlerInput) {
         return handlerInput.responseBuilder
@@ -179,11 +197,11 @@ const HelpHandler = {
 const skillBuilder = Alexa.SkillBuilders.custom();
 
 exports.handler = skillBuilder.addRequestHandlers(
-        LaunchAndNewsRequestHandler,
-        DetailHandler,
-        NextOrRepeatHandler,
-        HelpHandler,
-        ExitHandler,
-    )
+    LaunchAndNewsRequestHandler,
+    DetailHandler,
+    NextOrRepeatHandler,
+    HelpHandler,
+    ExitHandler,
+)
     .addErrorHandlers(ErrorHandler)
     .lambda();
